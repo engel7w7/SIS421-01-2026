@@ -1,0 +1,5 @@
+el dataset se encuentra en este link de drive, se subió en drivve por que era demasiado grande para github:
+
+link: https://drive.google.com/drive/folders/1vEnzdjANorpmXlkl2xzhiavT-DDyIk8Q?usp=sharing
+
+link original del dataset: https://www.kaggle.com/datasets/sumn2u/garbage-classification-v2
