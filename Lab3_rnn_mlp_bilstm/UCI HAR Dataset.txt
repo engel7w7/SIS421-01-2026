@@ -1,0 +1,5 @@
+el dataset se encuentra en este link de drive, se subió en drivve por que era demasiado grande para github:
+
+link: https://drive.google.com/drive/folders/1EItgvCnrOZ1O8AO3Ixdd1vStPSvQkUBk?usp=sharing
+
+link original del dataset: https://archive.ics.uci.edu/dataset/240/human+activity+recognition+using+smartphones
