@@ -1,0 +1,7 @@
+el dataset se encuentra en este link de drive, se subió en drivve por que era demasiado grande para github:
+
+link: https://drive.google.com/drive/folders/1EItgvCnrOZ1O8AO3Ixdd1vStPSvQkUBk?usp=sharing
+
+link original del dataset: :  https://cs.stanford.edu/~acoates/stl10/
+
+                           : https://www.kaggle.com/datasets/leonidas99/stl10-png
