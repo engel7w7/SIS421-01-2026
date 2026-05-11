@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Detallada - Transformer Encoder para Clasificación de Sonidos Urbanos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            border-bottom: 4px solid #ffc107;
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        /* Navigation */
+        nav {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0;
+        }
+
+        nav li {
+            margin: 0;
+        }
+
+        nav a {
+            display: block;
+            padding: 15px 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        nav a:hover {
+            background: #e9ecef;
+            border-bottom-color: #667eea;
+            color: #764ba2;
+        }
+
+        /* Main content */
+        main {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 100px;
+        }
+
+        section h2 {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #ffc107;
+        }
+
+        section h3 {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        section h4 {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Text styles */
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.8;
+        }
+
+        strong {
+            color: #764ba2;
+            font-weight: 600;
+        }
+
+        em {
+            color: #e74c3c;
+            font-style: italic;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        pre code {
+            color: #abb2bf;
+        }
+
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .number { color: #d19a66; }
+        .comment { color: #5c6370; font-style: italic; }
+        .function { color: #61afef; }
+        .class-name { color: #e06c75; }
+
+        /* Boxes */
+        .box {
+            border-left: 4px solid;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .info-box {
+            border-left-color: #3498db;
+            background: linear-gradient(135deg, rgba(52,152,219,0.1) 0%, rgba(52,152,219,0.05) 100%);
+        }
+
+        .warning-box {
+            border-left-color: #f39c12;
+            background: linear-gradient(135deg, rgba(243,156,18,0.1) 0%, rgba(243,156,18,0.05) 100%);
+        }
+
+        .success-box {
+            border-left-color: #27ae60;
+            background: linear-gradient(135deg, rgba(39,174,96,0.1) 0%, rgba(39,174,96,0.05) 100%);
+        }
+
+        .key-box {
+            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231,76,60,0.1) 0%, rgba(231,76,60,0.05) 100%);
+        }
+
+        .box-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        /* Diagrams */
+        .diagram {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+
+        .flow-chart {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+        }
+
+        /* Special elements */
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Two column layout */
+        .two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .col {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .two-cols {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            nav a {
+                padding: 10px 15px;
+            }
+        }
+
+        /* Questions section */
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .question-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .question-card h4 {
+            margin-top: 0;
+        }
+
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .question-card.active .answer {
+            display: block;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            nav {
+                display: none;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* SVG styles */
+        .architecture-diagram {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎵 Transformer Encoder</h1>
+            <p>Clasificación de Sonidos Urbanos con Urban Sound 8K</p>
+            <p style="margin-top: 15px; font-size: 0.95em;">SIS-421 | Sexto Semestre</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav>
+            <ul>
+                <li><a href="#introduccion">Introducción</a></li>
+                <li><a href="#dataset">Dataset</a></li>
+                <li><a href="#arquitectura">Arquitectura</a></li>
+                <li><a href="#implementacion">Implementación</a></li>
+                <li><a href="#entrenamiento">Entrenamiento</a></li>
+                <li><a href="#preguntas">Preguntas FAQ</a></li>
+                <li><a href="#conceptos">Conceptos Clave</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- 1. Introduction -->
+            <section id="introduccion">
+                <h2>📖 Introducción</h2>
+
+                <h3>¿Qué es un Transformer Encoder?</h3>
+                <p>Un <strong>Transformer Encoder</strong> es una arquitectura de red neuronal basada en mecanismos de <em>atención multi-cabeza</em> que fue introducida en el paper <strong>"Attention is All You Need"</strong> (Vaswani et al., 2017). A diferencia de las redes convolucionales (CNNs), los Transformers procesan secuencias completas en paralelo, permitiendo que cada elemento de la secuencia atienda a todos los demás elementos.</p>
+
+                <div class="box success-box">
+                    <div class="box-title">✓ Ventajas del Transformer Encoder</div>
+                    <ul>
+                        <li><strong>Paralelización:</strong> Procesa toda la secuencia simultáneamente, no secuencialmente</li>
+                        <li><strong>Atención Global:</strong> Cada posición puede relacionarse con cualquier otra posición</li>
+                        <li><strong>Menor Sesgo Inductivo:</strong> No asume ninguna estructura especial en los datos</li>
+                        <li><strong>Escalabilidad:</strong> Se puede entrenar con secuencias muy largas</li>
+                    </ul>
+                </div>
+
+                <h3>Aplicaciones Reales</h3>
+                <p>El Transformer Encoder es la base de modelos populares como:</p>
+                <ul>
+                    <li><strong>BERT</strong> - Para procesamiento de lenguaje natural</li>
+                    <li><strong>ViT (Vision Transformer)</strong> - Para clasificación de imágenes</li>
+                    <li><strong>Wav2Vec 2.0</strong> - Para procesamiento de audio</li>
+                    <li><strong>En nuestro caso:</strong> Clasificación de sonidos urbanos</li>
+                </ul>
+
+                <h3>Objetivo del Proyecto</h3>
+                <p>En este proyecto, implementamos un <strong>Transformer Encoder</strong> para clasificar automáticamente sonidos urbanos del dataset <em>Urban Sound 8K</em> en una de 10 categorías diferentes. El modelo procesa características MFCC (Mel Frequency Cepstral Coefficients) extraídas de archivos de audio para entender patrones temporales y realizar predicciones en tiempo real.</p>
+            </section>
+
+            <!-- 2. Dataset -->
+            <section id="dataset">
+                <h2>🎙️ Dataset: Urban Sound 8K</h2>
+
+                <h3>Características Principales</h3>
+                <table>
+                    <tr>
+                        <th>Propiedad</th>
+                        <th>Valor</th>
+                        <th>Descripción</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Total de Clips</strong></td>
+                        <td>8,732</td>
+                        <td>Archivos de audio grabados</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Duración</strong></td>
+                        <td>4-30 segundos</td>
+                        <td>Cada clip tiene una duración variable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ciudades</strong></td>
+                        <td>10</td>
+                        <td>Sonidos capturados en 10 ciudades diferentes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Clases</strong></td>
+                        <td>10</td>
+                        <td>Categorías de sonidos urbanos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Formato</strong></td>
+                        <td>.wav</td>
+                        <td>Audio sin compresar</td>
+                    </tr>
+                </table>
+
+                <h3>10 Clases de Sonidos</h3>
+                <div class="two-cols">
+                    <div class="col">
+                        <h4>1️⃣ Air Conditioner</h4>
+                        <p>Ruido constante de aire acondicionado</p>
+                    </div>
+                    <div class="col">
+                        <h4>2️⃣ Car Horn</h4>
+                        <p>Bocina de automóvil</p>
+                    </div>
+                    <div class="col">
+                        <h4>3️⃣ Children Playing</h4>
+                        <p>Niños jugando en la calle</p>
+                    </div>
+                    <div class="col">
+                        <h4>4️⃣ Dog Bark</h4>
+                        <p>Ladrido de perro</p>
+                    </div>
+                    <div class="col">
+                        <h4>5️⃣ Drilling</h4>
+                        <p>Taladro o perforación</p>
+                    </div>
+                    <div class="col">
+                        <h4>6️⃣ Engine Idling</h4>
+                        <p>Motor de auto en ralentí</p>
+                    </div>
+                    <div class="col">
+                        <h4>7️⃣ Gun Shot</h4>
+                        <p>Disparo de arma</p>
+                    </div>
+                    <div class="col">
+                        <h4>8️⃣ Jackhammer</h4>
+                        <p>Martillo neumático</p>
+                    </div>
+                    <div class="col">
+                        <h4>9️⃣ Siren</h4>
+                        <p>Sirena de ambulancia/policía</p>
+                    </div>
+                    <div class="col">
+                        <h4>🔟 Street Music</h4>
+                        <p>Música callejera</p>
+                    </div>
+                </div>
+
+                <h3>Extracción de Características MFCC</h3>
+
+                <p><strong>MFCC (Mel Frequency Cepstral Coefficients)</strong> son características que simulan cómo el oído humano percibe el sonido. Son especialmente útiles para clasificación de audio porque:</p>
+                <ul>
+                    <li>Están basadas en la escala Mel, que refleja cómo los humanos perciben frecuencias</li>
+                    <li>Capturan información relevante del espectro de frecuencias</li>
+                    <li>Son mucho más compactas que el audio crudo</li>
+                    <li>Reducen el ruido irrelevante para la clasificación</li>
+                </ul>
+
+                <h4>Proceso de Extracción (en el código):</h4>
+                <pre><code class="language-python"><span class="comment"># Cargar audio con frecuencia de muestreo 22050 Hz</span>
+y, sr = librosa.load(file_path, sr=22050)
+
+<span class="comment"># Extraer 13 coeficientes MFCC</span>
+mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+
+<span class="comment"># Transponer: (n_mfcc, tiempo) → (tiempo, n_mfcc)</span>
+mfcc = mfcc.T
+
+<span class="comment"># Normalización z-score por cada coeficiente</span>
+mfcc = (mfcc - mfcc.mean(axis=0, keepdims=True)) / (mfcc.std(axis=0, keepdims=True) + 1e-8)
+
+<span class="comment"># Hacer todas las muestras de longitud fija: 200 pasos de tiempo</span>
+<span class="keyword">if</span> mfcc.shape[0] < max_time_steps:
+    padding = np.zeros((max_time_steps - mfcc.shape[0], n_mfcc))
+    mfcc = np.vstack([mfcc, padding])
+<span class="keyword">else</span>:
+    mfcc = mfcc[:max_time_steps, :]</code></pre>
+
+                <div class="box info-box">
+                    <div class="box-title">ℹ️ Formato de Datos</div>
+                    <ul>
+                        <li><strong>Entrada del Modelo:</strong> Tensor de forma (batch_size, seq_len, n_mfcc) = (96, 128, 13)</li>
+                        <li><strong>Salida del Modelo:</strong> Logits de forma (batch_size, num_classes) = (96, 10)</li>
+                        <li><strong>Normalización:</strong> Cada coeficiente MFCC está normalizado independientemente</li>
+                        <li><strong>Padding:</strong> Para audios cortos se añaden ceros; para audios largos se truncan</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 3. Arquitectura -->
+            <section id="arquitectura">
+                <h2>🏗️ Arquitectura del Modelo</h2>
+
+                <h3>Componentes Principales</h3>
+
+                <div class="diagram">
+INPUT MFCC (128, 13)
+        ↓
+    EMBEDDING
+ Linear: 13 → 128
+        ↓
+ POSITIONAL ENCODING
+Suma de embeddings + posiciones
+        ↓
+  TRANSFORMER BLOCK 1
+  ├─ MultiHeadAttention (6 heads)
+  ├─ LayerNorm + Residual
+  ├─ MLP (128 → 512 → 128)
+  └─ LayerNorm + Residual
+        ↓
+  TRANSFORMER BLOCK 2
+  (Idem al anterior)
+        ↓
+  MEAN POOLING
+ Promedio sobre eje temporal
+        ↓
+ CLASSIFICATION HEAD
+ ├─ LayerNorm
+ ├─ Dropout
+ └─ Linear: 128 → 10 clases
+        ↓
+    OUTPUT LOGITS (10)
+                </div>
+
+                <h3>1. Embedding + Positional Encoding</h3>
+
+                <p><strong>¿Por qué necesitamos embedding?</strong></p>
+                <ul>
+                    <li>Los MFCCs tienen dimensión 13, pero el modelo trabaja con dimensión 128 (n_embd)</li>
+                    <li>El embedding proyecta los datos a este espacio latente más grande</li>
+                </ul>
+
+                <p><strong>¿Por qué necesitamos positional encoding?</strong></p>
+                <ul>
+                    <li>El mecanismo de atención es agnóstico al orden de los elementos</li>
+                    <li>Sin información de posición, [A, B] sería idéntico a [B, A]</li>
+                    <li>El positional encoding añade información sobre la posición temporal de cada frame MFCC</li>
+                </ul>
+
+                <pre><code class="language-python"><span class="comment"># Embedding</span>
+self.inp_emb = torch.nn.Linear(n_input=13, n_embd=128)
+
+<span class="comment"># Positional Encoding (aprende durante el entrenamiento)</span>
+self.pos_emb = torch.nn.Parameter(torch.zeros(1, seq_len=128, n_embd=128))
+
+<span class="comment"># Forward pass</span>
+e = self.inp_emb(x) + self.pos_emb  <span class="comment"># Suma elemento a elemento</span>
+e = self.dropout(e)</code></pre>
+
+                <h3>2. Multi-Head Attention</h3>
+
+                <p><strong>¿Cómo funciona la atención?</strong></p>
+                <p>La atención calcula una suma ponderada de los valores (V) basada en la similitud entre queries (Q) y keys (K):</p>
+
+                <div class="diagram">
+Attention(Q, K, V) = softmax(Q·K^T / √d_k)·V
+                </div>
+
+                <p><strong>¿Qué es "Multi-Head"?</strong></p>
+                <p>En lugar de aplicar atención una vez, aplicamos múltiples veces en paralelo (6 heads). Cada "head" atiende a diferentes aspectos de los datos:</p>
+                <ul>
+                    <li><strong>Head 1:</strong> Podría enfocarse en cambios rápidos (altas frecuencias)</li>
+                    <li><strong>Head 2:</strong> Podría enfocarse en patrones lentos (bajas frecuencias)</li>
+                    <li><strong>Head 3-6:</strong> Otros patrones importantes</li>
+                </ul>
+
+                <pre><code class="language-python"><span class="keyword">class</span> <span class="class-name">MultiHeadAttention</span>(torch.nn.Module):
+    <span class="keyword">def</span> forward(self, x):
+        B, L, F = x.size()  <span class="comment"># Batch, Length, Features</span>
+        
+        <span class="comment"># Proyectar a (B, L, n_heads*F)</span>
+        k = self.key(x).view(B, L, F, self.n_heads).transpose(1, 3)
+        q = self.query(x).view(B, L, F, self.n_heads).transpose(1, 3)
+        v = self.value(x).view(B, L, F, self.n_heads).transpose(1, 3)
+        
+        <span class="comment"># Calcular atención para cada head</span>
+        att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
+        att = torch.nn.functional.softmax(att, dim=-1)
+        y = att @ v
+        
+        <span class="comment"># Combinar heads</span>
+        y = y.transpose(1, 2).contiguous().view(B, L, F*self.n_heads)
+        return self.proj(y)</code></pre>
+
+                <h3>3. Transformer Block</h3>
+
+                <p>Un bloque Transformer es la unidad fundamental. Consiste en:</p>
+
+                <div class="diagram">
+┌─────────────────────────────┐
+│  ENTRADA (seq_len, n_embd)  │
+└──────────────┬──────────────┘
+               ↓
+        ┌─ MultiHeadAttention ─┐
+        │  (6 heads, 128 dims) │
+        └──────┬───────────────┘
+               ↓
+        ┌─ Dropout (0.4) ──┐
+        └──────┬────────────┘
+               ↓
+        Residual Connection (+)
+               ↓
+        ┌─ LayerNorm ──┐
+        └──────┬────────┘
+               ↓
+        ┌─ MLP ────────────────┐
+        │  128 → 512 → 128    │
+        │  (4x expansion)      │
+        └──────┬───────────────┘
+               ↓
+        ┌─ Dropout (0.4) ──┐
+        └──────┬────────────┘
+               ↓
+        Residual Connection (+)
+               ↓
+        ┌─ LayerNorm ──┐
+        └──────┬────────┘
+               ↓
+    ┌─ SALIDA (seq_len, n_embd) ─┐
+    └─────────────────────────────┘
+                </div>
+
+                <pre><code class="language-python"><span class="keyword">class</span> <span class="class-name">TransformerBlock</span>(torch.nn.Module):
+    <span class="keyword">def</span> forward(self, x):
+        <span class="comment"># Atención con residual y normalización</span>
+        x = self.ln1(x + self.dropout1(self.attn(x)))
+        
+        <span class="comment"># MLP con residual y normalización</span>
+        x = self.ln2(x + self.dropout2(self.mlp(x)))
+        return x</code></pre>
+
+                <div class="box warning-box">
+                    <div class="box-title">⚠️ Conexiones Residuales</div>
+                    <p>Las conexiones residuales (skip connections) son cruciales para entrenar modelos profundos. Permiten que el gradiente fluya directamente a través de capas, evitando el problema del gradiente que desaparece.</p>
+                </div>
+
+                <h3>4. Clasificación Final</h3>
+
+                <p>Después de pasar por los bloques Transformer, tenemos una secuencia de 128 embeddings. Para hacer la clasificación en 10 clases, utilizamos:</p>
+
+                <ul>
+                    <li><strong>Mean Pooling:</strong> Promediamos todos los embeddings temporales a uno solo</li>
+                    <li><strong>Classification Head:</strong> MLP que mapea el embedding promediado a 10 scores</li>
+                </ul>
+
+                <pre><code class="language-python"><span class="comment"># Después de transformer</span>
+x = self.transformer(e)  <span class="comment"># Shape: (B, 128, 128)</span>
+
+<span class="comment"># Mean pooling sobre la dimensión temporal</span>
+x_pooled = x.mean(dim=1)  <span class="comment"># Shape: (B, 128)</span>
+
+<span class="comment"># Classification head</span>
+logits = self.fc(x_pooled)  <span class="comment"># Shape: (B, 10)</span>
+predictions = torch.argmax(logits, dim=1)  <span class="comment"># Shape: (B,)</span></code></pre>
+            </section>
+
+            <!-- 4. Implementación -->
+            <section id="implementacion">
+                <h2>💻 Implementación Detallada</h2>
+
+                <h3>1. UrbanSoundDataset</h3>
+
+                <p>La clase <code>UrbanSoundDataset</code> hereda de <code>torch.utils.data.Dataset</code> y se encarga de cargar y procesar archivos de audio individuales:</p>
+
+                <pre><code class="language-python"><span class="keyword">class</span> <span class="class-name">UrbanSoundDataset</span>(torch.utils.data.Dataset):
+    <span class="keyword">def</span> __init__(self, metadata_path, audio_dir, n_mfcc=13, sr=22050, max_time_steps=200):
+        <span class="comment"># Cargar metadatos CSV</span>
+        self.metadata = pd.read_csv(metadata_path)
+        self.audio_dir = Path(audio_dir)
+        self.n_mfcc = n_mfcc           <span class="comment"># 13 coeficientes MFCC</span>
+        self.sr = sr                    <span class="comment"># Sample rate: 22050 Hz</span>
+        self.max_time_steps = max_time_steps  <span class="comment"># Longitud fija</span>
+    
+    <span class="keyword">def</span> __len__(self):
+        <span class="comment"># Número total de muestras</span>
+        <span class="keyword">return</span> len(self.metadata)
+    
+    <span class="keyword">def</span> __getitem__(self, idx):
+        <span class="comment"># Cargar una muestra individual</span>
+        row = self.metadata.iloc[idx]
+        file_path = self.audio_dir / <span class="string">f"fold{row['fold']}"</span> / row[<span class="string">'slice_file_name'</span>]
+        
+        <span class="keyword">try</span>:
+            <span class="comment"># 1. Cargar archivo de audio</span>
+            y, sr = librosa.load(file_path, sr=self.sr)
+            
+            <span class="comment"># 2. Extraer MFCC</span>
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=self.n_mfcc)
+            mfcc = mfcc.T  <span class="comment"># (n_mfcc, tiempo) → (tiempo, n_mfcc)</span>
+            
+            <span class="comment"># 3. Normalizar</span>
+            mfcc = (mfcc - mfcc.mean(axis=0, keepdims=True)) / (mfcc.std(axis=0, keepdims=True) + 1e-8)
+            
+            <span class="comment"># 4. Hacer longitud fija (pad o truncate)</span>
+            <span class="keyword">if</span> mfcc.shape[0] < self.max_time_steps:
+                padding = np.zeros((self.max_time_steps - mfcc.shape[0], self.n_mfcc))
+                mfcc = np.vstack([mfcc, padding])
+            <span class="keyword">else</span>:
+                mfcc = mfcc[:self.max_time_steps, :]
+            
+            <span class="comment"># 5. Convertir a tensor</span>
+            mfcc = torch.tensor(mfcc).float()
+            label = torch.tensor(row[<span class="string">'classID'</span>]).long()
+            <span class="keyword">return</span> mfcc, label
+        <span class="keyword">except</span>:
+            <span class="comment"># En caso de error, retornar tensor vacío</span>
+            <span class="keyword">return</span> torch.zeros(self.max_time_steps, self.n_mfcc).float(), torch.tensor(0).long()</code></pre>
+
+                <h3>2. UrbanSoundDataModule (PyTorch Lightning)</h3>
+
+                <p>La clase <code>UrbanSoundDataModule</code> maneja la carga de datos usando PyTorch Lightning, que automáticamente gestiona el data loading de manera eficiente:</p>
+
+                <pre><code class="language-python"><span class="keyword">class</span> <span class="class-name">UrbanSoundDataModule</span>(pl.LightningDataModule):
+    <span class="keyword">def</span> __init__(self, metadata_path, audio_dir, batch_size=32, test_fold=5):
+        super().__init__()
+        self.metadata_path = metadata_path
+        self.audio_dir = audio_dir
+        self.batch_size = batch_size
+        self.test_fold = test_fold  <span class="comment"># Usar fold 5 como test</span>
+    
+    <span class="keyword">def</span> setup(self, stage=None):
+        <span class="comment"># Crear dataset completo</span>
+        full_dataset = UrbanSoundDataset(self.metadata_path, self.audio_dir)
+        metadata = pd.read_csv(self.metadata_path)
+        
+        <span class="comment"># Split: 80% train, 20% test</span>
+        train_idx = metadata[metadata[<span class="string">'fold'</span>] != self.test_fold].index
+        test_idx = metadata[metadata[<span class="string">'fold'</span>] == self.test_fold].index
+        
+        <span class="comment"># Crear subsets</span>
+        self.train_ds = torch.utils.data.Subset(full_dataset, train_idx)
+        self.val_ds = torch.utils.data.Subset(full_dataset, test_idx)
+    
+    <span class="keyword">def</span> train_dataloader(self):
+        <span class="keyword">return</span> DataLoader(self.train_ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+    
+    <span class="keyword">def</span> val_dataloader(self):
+        <span class="keyword">return</span> DataLoader(self.val_ds, batch_size=self.batch_size, num_workers=0)</code></pre>
+
+                <h3>3. UrbanSoundModel (Transformer Encoder)</h3>
+
+                <p>El modelo principal que integra todos los componentes:</p>
+
+                <pre><code class="language-python"><span class="keyword">class</span> <span class="class-name">UrbanSoundModel</span>(pl.LightningModule):
+    <span class="keyword">def</span> __init__(self, n_input=13, n_embd=128, seq_len=128, n_heads=6, n_layers=2, dropout=0.4, weight_decay=5e-4):
+        super().__init__()
+        self.seq_len = seq_len
+        self.n_embd = n_embd
+        self.weight_decay = weight_decay
+        
+        <span class="comment"># EMBEDDING + POSITIONAL ENCODING</span>
+        self.inp_emb = torch.nn.Linear(n_input, n_embd)
+        self.pos_emb = torch.nn.Parameter(torch.zeros(1, seq_len, n_embd))
+        self.dropout = torch.nn.Dropout(dropout)
+        
+        <span class="comment"># TRANSFORMER BLOCKS</span>
+        self.transformer = torch.nn.Sequential(
+            *[TransformerBlock(n_embd, n_heads, dropout=dropout) for _ in range(n_layers)]
+        )
+        
+        <span class="comment"># CLASSIFICATION HEAD</span>
+        self.fc = torch.nn.Sequential(
+            torch.nn.LayerNorm(n_embd),
+            torch.nn.Dropout(dropout),
+            torch.nn.Linear(n_embd, 10)
+        )
+    
+    <span class="keyword">def</span> forward(self, x):
+        B = x.size(0)
+        
+        <span class="comment"># Pad o truncate a seq_len</span>
+        <span class="keyword">if</span> x.size(1) < self.seq_len:
+            pad_len = self.seq_len - x.size(1)
+            x = torch.nn.functional.pad(x, (0, 0, 0, pad_len))
+        <span class="keyword">else</span>:
+            x = x[:, :self.seq_len, :]
+        
+        <span class="comment"># EMBEDDING + POSITIONAL ENCODING</span>
+        e = self.inp_emb(x) + self.pos_emb
+        e = self.dropout(e)
+        
+        <span class="comment"># TRANSFORMER</span>
+        x = self.transformer(e)
+        
+        <span class="comment"># MEAN POOLING + CLASSIFICATION</span>
+        y = self.fc(x.mean(dim=1))
+        <span class="keyword">return</span> y</code></pre>
+
+                <h3>4. Métodos de Entrenamiento</h3>
+
+                <pre><code class="language-python"><span class="keyword">def</span> training_step(self, batch, batch_idx):
+    loss, acc = self.compute_loss_and_acc(batch)
+    self.log(<span class="string">'train_loss'</span>, loss, prog_bar=True, on_step=True, on_epoch=True)
+    self.log(<span class="string">'train_acc'</span>, acc, prog_bar=True, on_step=False, on_epoch=True)
+    <span class="keyword">return</span> loss
+
+<span class="keyword">def</span> validation_step(self, batch, batch_idx):
+    loss, acc = self.compute_loss_and_acc(batch)
+    self.log(<span class="string">'val_loss'</span>, loss, prog_bar=True)
+    self.log(<span class="string">'val_acc'</span>, acc, prog_bar=True)
+
+<span class="keyword">def</span> configure_optimizers(self):
+    optimizer = torch.optim.Adam(self.parameters(), lr=0.0004, weight_decay=5e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=15, eta_min=1e-6)
+    <span class="keyword">return</span> [optimizer], [{<span class="string">"scheduler"</span>: scheduler, <span class="string">"interval"</span>: <span class="string">"epoch"</span>}]</code></pre>
+            </section>
+
+            <!-- 5. Entrenamiento -->
+            <section id="entrenamiento">
+                <h2>🚀 Proceso de Entrenamiento</h2>
+
+                <h3>Configuración del Entrenamiento</h3>
+
+                <pre><code class="language-python"><span class="comment"># Crear modelo con hiperparámetros optimizados</span>
+model = UrbanSoundModel(
+    n_input=13,           <span class="comment"># MFCC features</span>
+    n_embd=128,           <span class="comment"># Embedding dimension</span>
+    seq_len=128,          <span class="comment"># Longitud fija de secuencia</span>
+    n_heads=6,            <span class="comment"># Multi-head attention</span>
+    n_layers=2,           <span class="comment"># 2 bloques Transformer</span>
+    weight_decay=5e-4,    <span class="comment"># Regularización L2</span>
+    dropout=0.4           <span class="comment"># Dropout para regularización</span>
+)
+
+<span class="comment"># Callbacks para mejores prácticas</span>
+early_stop = EarlyStopping(
+    monitor=<span class="string">'val_loss'</span>,
+    patience=8,           <span class="comment"># Parar si val_loss no mejora en 8 épocas</span>
+    verbose=True,
+    mode=<span class="string">'min'</span>
+)
+
+checkpoint = ModelCheckpoint(
+    monitor=<span class="string">'val_acc'</span>,
+    dirpath=<span class="string">'checkpoints'</span>,
+    filename=<span class="string">'best-checkpoint-{epoch:02d}'</span>,
+    save_top_k=1,         <span class="comment"># Guardar solo el mejor modelo</span>
+    mode=<span class="string">'max'</span>
+)
+
+<span class="comment"># Configurar trainer</span>
+trainer = pl.Trainer(
+    max_epochs=30,
+    callbacks=[early_stop, checkpoint],
+    log_every_n_steps=1,
+    check_val_every_n_epoch=1,
+    precision=<span class="string">'16-mixed'</span>,  <span class="comment"># Mixed precision training</span>
+    num_sanity_val_steps=0,
+    logger=True,
+    enable_checkpointing=True
+)
+
+<span class="comment"># Entrenar</span>
+trainer.fit(model, dm)</code></pre>
+
+                <h3>Hiperparámetros Explicados</h3>
+
+                <table>
+                    <tr>
+                        <th>Parámetro</th>
+                        <th>Valor</th>
+                        <th>Razón</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning Rate</strong></td>
+                        <td>0.0004</td>
+                        <td>Valores más altos pueden causar divergencia; Transformers suelen usar LR bajos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Weight Decay</strong></td>
+                        <td>5e-4</td>
+                        <td>Regularización L2 para evitar overfitting</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dropout</strong></td>
+                        <td>0.4</td>
+                        <td>Desactiva 40% de neuronas aleatoriamente durante entrenamiento</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Batch Size</strong></td>
+                        <td>96</td>
+                        <td>Balance entre velocidad y estabilidad del gradiente</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max Epochs</strong></td>
+                        <td>30</td>
+                        <td>Límite superior; Early Stopping detiene antes si no hay mejora</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Optimizer</strong></td>
+                        <td>Adam</td>
+                        <td>Adaptive learning rates, excelente para Transformers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scheduler</strong></td>
+                        <td>CosineAnnealing</td>
+                        <td>Reduce gradualmente el LR de manera suave</td>
+                    </tr>
+                </table>
+
+                <h3>Técnicas de Regularización</h3>
+
+                <div class="box key-box">
+                    <div class="box-title">🔑 Técnicas para Evitar Overfitting</div>
+                    <ul>
+                        <li><strong>Dropout (0.4):</strong> Desactiva aleatoriamente neuronas durante entrenamiento</li>
+                        <li><strong>Weight Decay (5e-4):</strong> Penaliza pesos grandes en la función de pérdida</li>
+                        <li><strong>Early Stopping:</strong> Detiene entrenamiento cuando val_loss no mejora</li>
+                        <li><strong>Cross-Fold Validation:</strong> Usa fold 5 como test, resto como train</li>
+                        <li><strong>LayerNorm:</strong> Normaliza activaciones en cada capa</li>
+                    </ul>
+                </div>
+
+                <h3>Métricas Monitoreadas</h3>
+
+                <ul>
+                    <li><strong>train_loss:</strong> Cross-entropy loss en datos de entrenamiento</li>
+                    <li><strong>train_acc:</strong> Precisión en datos de entrenamiento</li>
+                    <li><strong>val_loss:</strong> Cross-entropy loss en datos de validación</li>
+                    <li><strong>val_acc:</strong> Precisión en datos de validación (métrica principal)</li>
+                </ul>
+
+                <div class="box warning-box">
+                    <div class="box-title">⚠️ ¿Qué indica el diferencia entre train_acc y val_acc?</div>
+                    <ul>
+                        <li><strong>val_acc << train_acc:</strong> Posible overfitting. Solución: aumentar dropout, weight decay, o usar más datos</li>
+                        <li><strong>val_acc ≈ train_acc:</strong> Buen balance. El modelo generaliza bien</li>
+                        <li><strong>Ambas bajas:</strong> Underfitting. Solución: modelo más grande, entrenar más épocas, mejor hyperparameter tuning</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 6. Preguntas FAQ -->
+            <section id="preguntas">
+                <h2>❓ Preguntas Frecuentes para la Defensa</h2>
+
+                <p>Haz click en cada pregunta para ver la respuesta detallada:</p>
+
+                <div class="questions-grid">
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Qué es el mecanismo de atención?</h4>
+                        <div class="answer">
+                            <p>La atención es un mecanismo que permite que el modelo se enfoque en diferentes partes de la entrada según su importancia. Matemáticamente:</p>
+                            <p><strong>Attention(Q, K, V) = softmax(Q·K^T / √d_k)·V</strong></p>
+                            <ul>
+                                <li><strong>Q (Query):</strong> "¿Qué quiero saber?"</li>
+                                <li><strong>K (Key):</strong> "¿Qué puedo ofrecer?" - Se compara con Query</li>
+                                <li><strong>V (Value):</strong> "Aquí está la información actual"</li>
+                                <li><strong>softmax(Q·K^T):</strong> Pesos de atención (qué tan relevante es cada posición)</li>
+                                <li><strong>√d_k:</strong> Factor de escala para estabilidad numérica</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Por qué "Multi-Head"?</h4>
+                        <div class="answer">
+                            <p>En lugar de aplicar atención una sola vez, aplicamos múltiples veces en paralelo. Cada "head" puede aprender diferentes aspectos:</p>
+                            <ul>
+                                <li><strong>Head 1:</strong> Relaciones a corto plazo en MFCC</li>
+                                <li><strong>Head 2:</strong> Patrones de media duración</li>
+                                <li><strong>Head 3-6:</strong> Otros patrones relevantes</li>
+                            </ul>
+                            <p>Luego concatenamos todas las salidas: output = [head1, head2, ..., head6] · W_o</p>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Qué son los MFCC y por qué extraerlos?</h4>
+                        <div class="answer">
+                            <p><strong>MFCC = Mel Frequency Cepstral Coefficients</strong></p>
+                            <p>Son características que representan el sonido de manera que refleja cómo lo percibe el oído humano:</p>
+                            <ul>
+                                <li>Basadas en escala Mel (cómo oímos frecuencias)</li>
+                                <li>Mucho más compactas que audio crudo (13 valores vs millones)</li>
+                                <li>Capturan características relevantes para clasificación</li>
+                                <li>Reducen ruido irrelevante</li>
+                            </ul>
+                            <p>Sin MFCC, tendríamos que procesar audio crudo (22050 muestras/segundo), lo cual sería muy costoso computacionalmente.</p>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Por qué conexiones residuales?</h4>
+                        <div class="answer">
+                            <p>Las conexiones residuales (skip connections) son: x = x + f(x)</p>
+                            <p><strong>Ventajas:</strong></p>
+                            <ul>
+                                <li>Permiten entrenar modelos muy profundos (sin ellas, el gradiente desaparece)</li>
+                                <li>Facilitan el flujo de información desde capas anteriores</li>
+                                <li>Hacen que sea más fácil aprender perturbaciones pequeñas que mejoran la representación</li>
+                                <li>Son especialmente importantes en Transformers (muchas capas apiladas)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Qué es Positional Encoding y por qué es necesario?</h4>
+                        <div class="answer">
+                            <p>El mecanismo de atención es agnóstico al orden. Sin Positional Encoding:</p>
+                            <ul>
+                                <li>[MFCC_t1, MFCC_t2, MFCC_t3] daría el mismo resultado que</li>
+                                <li>[MFCC_t3, MFCC_t1, MFCC_t2]</li>
+                            </ul>
+                            <p><strong>Positional Encoding añade información de posición:</strong></p>
+                            <ul>
+                                <li>En este proyecto: pos_emb = torch.nn.Parameter(torch.zeros(1, 128, 128)) que se aprende</li>
+                                <li>En BERT/ViT: funciones sinusoidales (sin y cos) de diferentes frecuencias</li>
+                                <li>Resultado: el modelo sabe en qué posición temporal está cada frame MFCC</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Cómo el modelo aprende a clasificar?</h4>
+                        <div class="answer">
+                            <p><strong>Proceso:</strong></p>
+                            <ol>
+                                <li>MFCC (13D) → Embedding (128D) + Positional Encoding</li>
+                                <li>2 Bloques Transformer: Cada uno tiene atención + MLP</li>
+                                <li>Mean Pooling: Promediamos la secuencia (128×128) → (128)</li>
+                                <li>Classification Head: (128) → (10 logits)</li>
+                                <li>Cross-Entropy Loss: Comparamos logits con etiqueta verdadera</li>
+                                <li>Backpropagation: Ajustamos pesos para minimizar pérdida</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Qué es Dropout y cómo ayuda?</h4>
+                        <div class="answer">
+                            <p><strong>Dropout es una técnica de regularización:</strong></p>
+                            <ul>
+                                <li>Durante entrenamiento: desactiva aleatoriamente el 40% de neuronas</li>
+                                <li>Durante evaluación: todas las neuronas están activas</li>
+                            </ul>
+                            <p><strong>¿Por qué funciona?</strong></p>
+                            <ul>
+                                <li>Evita que el modelo dependa excesivamente de conexiones específicas</li>
+                                <li>Fuerza al modelo a aprender representaciones robustas</li>
+                                <li>Actúa como un ensamble de sub-modelos</li>
+                                <li>Reduce significativamente el overfitting</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Diferencia entre LayerNorm y Batch Normalization?</h4>
+                        <div class="answer">
+                            <p><strong>LayerNorm:</strong> Normaliza cada muestra independientemente</p>
+                            <ul>
+                                <li>Promediamos y normalizamos sobre las features (no sobre el batch)</li>
+                                <li>Mejor para Transformers (mejor con batch sizes pequeños o variables)</li>
+                                <li>No depende del tamaño del batch</li>
+                            </ul>
+                            <p><strong>Batch Normalization:</strong> Normaliza sobre el batch</p>
+                            <ul>
+                                <li>Promediamos y normalizamos sobre las muestras del batch</li>
+                                <li>Mejor para CNNs</li>
+                                <li>Requiere batch size suficientemente grande</li>
+                            </ul>
+                            <p>En Transformers usamos LayerNorm porque es más estable.</p>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Cómo se manejan audios de duración variable?</h4>
+                        <div class="answer">
+                            <p><strong>El problema:</strong> Urban Sound 8K tiene audios de 4-30 segundos</p>
+                            <p><strong>La solución - Padding:</strong></p>
+                            <ul>
+                                <li>Fijamos longitud máxima: 128 frames (≈ 3 segundos a 22050 Hz)</li>
+                                <li>Si audio es más corto: rellenar con ceros al final</li>
+                                <li>Si audio es más largo: truncar a los primeros 128 frames</li>
+                            </ul>
+                            <p><strong>Ventajas:</strong> Batch processing es eficiente (todos tienen mismo tamaño)</p>
+                            <p><strong>Desventajas:</strong> Perdemos información de audios largos; padding con ceros puede no ser óptimo</p>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Por qué Adam optimizer + Cosine Annealing?</h4>
+                        <div class="answer">
+                            <p><strong>Adam Optimizer:</strong></p>
+                            <ul>
+                                <li>Mantiene moving average del gradiente (momentum)</li>
+                                <li>Mantiene moving average del gradiente² (adaptive learning rate)</li>
+                                <li>Excelente para Transformers (mejor convergencia que SGD)</li>
+                                <li>Learning rate inicial: 0.0004 (bajo para estabilidad)</li>
+                            </ul>
+                            <p><strong>Cosine Annealing Scheduler:</strong></p>
+                            <ul>
+                                <li>Reduce learning rate suavemente de forma coseno</li>
+                                <li>Comienza en 0.0004, termina en 1e-6 después de 15 épocas</li>
+                                <li>Permite exploración inicial, luego fine-tuning hacia el final</li>
+                                <li>Mejor que decay lineal para convergencia</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Qué es Early Stopping y cómo evita overfitting?</h4>
+                        <div class="answer">
+                            <p><strong>Early Stopping:</strong> Detiene el entrenamiento cuando la métrica de validación deja de mejorar</p>
+                            <ul>
+                                <li>Monitoreamos val_loss en nuestro caso</li>
+                                <li>Si no mejora en 8 épocas consecutivas, paramos el entrenamiento</li>
+                                <li>Esto previene que el modelo memorice el conjunto de entrenamiento</li>
+                            </ul>
+                            <p><strong>¿Por qué funciona?</strong></p>
+                            <ul>
+                                <li>Fase 1: train_loss y val_loss bajan (aprendizaje)</li>
+                                <li>Fase 2: train_loss sigue bajando pero val_loss sube (overfitting)</li>
+                                <li>Early Stopping detiene en el punto óptimo (fin de fase 2)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Por qué Mean Pooling en lugar de otros métodos?</h4>
+                        <div class="answer">
+                            <p><strong>Alternativas y sus trade-offs:</strong></p>
+                            <ul>
+                                <li><strong>Max Pooling:</strong> Toma valor máximo. Pierde información de contexto.</li>
+                                <li><strong>Mean Pooling:</strong> Promedia todos. Balanceado y simple. ✓ Mejor opción</li>
+                                <li><strong>Last Token:</strong> Toma último frame. Sesgado hacia final del audio.</li>
+                                <li><strong>CLS Token:</strong> Token especial (como en BERT). Requiere arquitectura especial.</li>
+                                <li><strong>Attention Pooling:</strong> Pesos aprendidos. Más complejo pero más flexible.</li>
+                            </ul>
+                            <p>Elegimos Mean Pooling porque es simple, efectivo, y captura información de toda la secuencia de manera uniforme.</p>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Cómo se evalúa el modelo después del entrenamiento?</h4>
+                        <div class="answer">
+                            <p><strong>Métricas principales:</strong></p>
+                            <ul>
+                                <li><strong>Accuracy:</strong> Porcentaje de predicciones correctas en el conjunto de validación</li>
+                                <li><strong>Loss (Cross-Entropy):</strong> Mide la diferencia entre predicción y etiqueta verdadera</li>
+                            </ul>
+                            <p><strong>Interpretación:</strong></p>
+                            <ul>
+                                <li>val_acc > 90%: Excelente desempeño</li>
+                                <li>val_acc 80-90%: Buen desempeño</li>
+                                <li>val_acc 70-80%: Desempeño aceptable</li>
+                                <li>val_acc < 70%: Necesita mejora</li>
+                            </ul>
+                            <p><strong>Pruebas adicionales (en producción):</strong></p>
+                            <ul>
+                                <li>Matriz de confusión: ¿Qué clases confunde el modelo?</li>
+                                <li>Precisión y Recall por clase: ¿Es balanceado?</li>
+                                <li>Robustez a ruido: ¿Funciona con audios ruidosos?</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="question-card" onclick="this.classList.toggle('active')">
+                        <h4>¿Cuáles son las principales limitaciones del modelo?</h4>
+                        <div class="answer">
+                            <p><strong>Limitaciones técnicas:</strong></p>
+                            <ul>
+                                <li>Padding/Truncating: Perdemos información de audios muy largos</li>
+                                <li>Dependencia de longitud fija: No puede procesar audios de longitud arbitraria</li>
+                                <li>Costo computacional: Multi-head attention es O(n²) en memoria</li>
+                            </ul>
+                            <p><strong>Limitaciones de datos:</strong></p>
+                            <ul>
+                                <li>Dataset pequeño: 8,732 muestras (poco para deep learning)</li>
+                                <li>Desbalance de clases: Algunas clases más frecuentes que otras</li>
+                                <li>Sesgo geográfico: Sonidos de solo 10 ciudades</li>
+                            </ul>
+                            <p><strong>Posibles mejoras:</strong></p>
+                            <ul>
+                                <li>Data augmentation (time stretching, pitch shifting)</li>
+                                <li>Usar modelos pre-entrenados (transfer learning)</li>
+                                <li>Arquitectura recurrente para manejar longitudes variables</li>
+                                <li>Ensemble de modelos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Conceptos Clave -->
+            <section id="conceptos">
+                <h2>🧠 Conceptos Clave para Memorizar</h2>
+
+                <h3>Tensor Shapes (Formas)</h3>
+                <pre><code class="language-text">Input MFCC:                (batch_size, seq_len, n_mfcc)
+                           = (96, 128, 13)
+
+Después de Embedding:      (batch_size, seq_len, n_embd)
+                           = (96, 128, 128)
+
+Después de cada Transformer Block: Misma forma
+                           = (96, 128, 128)
+
+Después de Mean Pooling:   (batch_size, n_embd)
+                           = (96, 128)
+
+Output Logits:             (batch_size, num_classes)
+                           = (96, 10)</code></pre>
+
+                <h3>Componentes del Transformer Block</h3>
+
+                <table>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Función</th>
+                        <th>Entrada/Salida</th>
+                    </tr>
+                    <tr>
+                        <td><strong>MultiHeadAttention</strong></td>
+                        <td>Calcula relaciones entre secuencias</td>
+                        <td>(B, L, F) → (B, L, F)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LayerNorm 1</strong></td>
+                        <td>Normaliza salida de atención</td>
+                        <td>(B, L, F) → (B, L, F)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dropout 1</strong></td>
+                        <td>Regularización durante entrenamiento</td>
+                        <td>(B, L, F) → (B, L, F)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MLP</strong></td>
+                        <td>F → 4F → F (non-linearity)</td>
+                        <td>(B, L, F) → (B, L, F)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LayerNorm 2</strong></td>
+                        <td>Normaliza salida de MLP</td>
+                        <td>(B, L, F) → (B, L, F)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dropout 2</strong></td>
+                        <td>Regularización durante entrenamiento</td>
+                        <td>(B, L, F) → (B, L, F)</td>
+                    </tr>
+                </table>
+
+                <h3>Ecuaciones Importantes</h3>
+
+                <div class="box info-box">
+                    <div class="box-title">📐 Matemáticas Clave</div>
+
+                    <h4>1. Scaled Dot-Product Attention</h4>
+                    <p><strong>Attention(Q, K, V) = softmax(Q·K^T / √d_k)·V</strong></p>
+                    <ul>
+                        <li>Q·K^T produce similitud entre queries y keys</li>
+                        <li>Dividir por √d_k es crucial para estabilidad (gradient flow)</li>
+                        <li>Softmax convierte similaridades en probabilidades</li>
+                        <li>Multiplicar por V da la salida ponderada</li>
+                    </ul>
+
+                    <h4>2. Multi-Head</h4>
+                    <p><strong>head_i = Attention(Q·W_Q^i, K·W_K^i, V·W_V^i)</strong></p>
+                    <p><strong>MultiHead(Q,K,V) = Concat(head_1,...,head_h)·W^O</strong></p>
+
+                    <h4>3. Feed-Forward Network</h4>
+                    <p><strong>FFN(x) = ReLU(x·W_1 + b_1)·W_2 + b_2</strong></p>
+                    <p>Típicamente: d_model → 4×d_model → d_model (en nuestro caso: 128 → 512 → 128)</p>
+
+                    <h4>4. Cross-Entropy Loss</h4>
+                    <p><strong>L = -Σ_i y_i · log(p_i)</strong></p>
+                    <p>Donde y_i es la etiqueta (one-hot) y p_i es la probabilidad predicha</p>
+
+                    <h4>5. Adam Optimizer</h4>
+                    <p><strong>m_t = β₁·m_{t-1} + (1-β₁)·g_t</strong> (1st moment)</p>
+                    <p><strong>v_t = β₂·v_{t-1} + (1-β₂)·g_t²</strong> (2nd moment)</p>
+                    <p><strong>θ_t = θ_{t-1} - α·m_t / (√v_t + ε)</strong></p>
+                </div>
+
+                <h3>Hiperparámetros vs Arquitectura</h3>
+
+                <table>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Parámetro</th>
+                        <th>Valor</th>
+                        <th>Impacto</th>
+                    </tr>
+                    <tr>
+                        <td rowspan="3"><strong>Arquitectura</strong></td>
+                        <td>n_heads</td>
+                        <td>6</td>
+                        <td>Más heads = más capacidad expresiva pero más parámetros</td>
+                    </tr>
+                    <tr>
+                        <td>n_layers</td>
+                        <td>2</td>
+                        <td>Más capas = puede capturar dependencias más complejas</td>
+                    </tr>
+                    <tr>
+                        <td>n_embd</td>
+                        <td>128</td>
+                        <td>Dimensión del espacio latente. Más = más capacidad</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3"><strong>Aprendizaje</strong></td>
+                        <td>learning_rate</td>
+                        <td>0.0004</td>
+                        <td>Controla velocidad de convergencia. Bajo = estable pero lento</td>
+                    </tr>
+                    <tr>
+                        <td>weight_decay</td>
+                        <td>5e-4</td>
+                        <td>Penaliza pesos grandes. Aumenta = menos overfitting</td>
+                    </tr>
+                    <tr>
+                        <td>dropout</td>
+                        <td>0.4</td>
+                        <td>Probabilidad de desactivar neurona. Aumenta = menos overfitting</td>
+                    </tr>
+                </table>
+
+                <h3>Definiciones Importantes</h3>
+
+                <ul>
+                    <li><strong>Embedding:</strong> Proyección lineal que mapea datos a un espacio de mayor dimensión donde patrones son más fáciles de aprender</li>
+
+                    <li><strong>Query, Key, Value:</strong> Las tres proyecciones del mecanismo de atención que permiten al modelo relacionar información</li>
+
+                    <li><strong>Residual Connection:</strong> x = x + f(x). Permite que el gradiente fluya directamente a través de capas</li>
+
+                    <li><strong>Layer Normalization:</strong> Normaliza features de cada muestra independientemente. Estabiliza entrenamiento</li>
+
+                    <li><strong>Dropout:</strong> Desactiva aleatoriamente neuronas. Reduce co-adaptación y overfitting</li>
+
+                    <li><strong>Cross-Entropy Loss:</strong> Mide diferencia entre distribución predicha y verdadera. Estándar para clasificación</li>
+
+                    <li><strong>Accuracy:</strong> Porcentaje de predicciones correctas. Métrica principal para evaluación</li>
+
+                    <li><strong>Mean Pooling:</strong> Promedia features sobre una dimensión. Reduce dimensionalidad</li>
+                </ul>
+            </section>
+
+            <!-- 8. Resumen Ejecutivo -->
+            <section id="resumen">
+                <h2>📝 Resumen Ejecutivo</h2>
+
+                <h3>¿Qué Hicimos?</h3>
+                <p>Implementamos un <strong>Transformer Encoder</strong> para clasificar automáticamente sonidos urbanos del dataset <strong>Urban Sound 8K</strong> en una de 10 categorías diferentes.</p>
+
+                <h3>¿Cómo Funciona?</h3>
+                <ol>
+                    <li>Extraemos características MFCC de archivos de audio (.wav)</li>
+                    <li>Normalizamos y hacemos longitud fija mediante padding</li>
+                    <li>Pasamos por 2 Bloques Transformer con Multi-Head Attention (6 heads)</li>
+                    <li>Hacemos Mean Pooling para obtener un embedding único</li>
+                    <li>Clasificamos en 10 clases mediante un MLP</li>
+                </ol>
+
+                <h3>¿Por qué Transformers?</h3>
+                <ul>
+                    <li>Atención global: Cada frame MFCC puede relacionarse con todos los demás</li>
+                    <li>Paralelización: Procesa toda la secuencia simultáneamente</li>
+                    <li>Multi-Head: Captura múltiples aspectos del audio</li>
+                    <li>Estado del arte: Mejor que CNNs para este tipo de datos</li>
+                </ul>
+
+                <h3>Ventajas del Enfoque</h3>
+                <span class="badge badge-success">✓ Paralelizable</span>
+                <span class="badge badge-success">✓ Escalable</span>
+                <span class="badge badge-success">✓ Interpretable (atención)</span>
+                <span class="badge badge-info">ℹ️ Estado del arte</span>
+                <span class="badge badge-warning">⚠️ Requiere normalización</span>
+
+                <h3>Mejoras Futuras</h3>
+                <ul>
+                    <li>Transfer Learning: Pre-entrenar en dataset más grande</li>
+                    <li>Data Augmentation: Time stretching, pitch shifting</li>
+                    <li>Arquitectura Recurrente: Manejar longitudes variables</li>
+                    <li>Explainability: Visualizar qué aprende el modelo</li>
+                </ul>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p><strong>Transformer Encoder para Clasificación de Sonidos Urbanos</strong></p>
+            <p>SIS-421 | Sexto Semestre</p>
+            <p>Dataset: Urban Sound 8K | Framework: PyTorch + PyTorch Lightning</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">Documento de estudio preparado para defensa del proyecto</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        });
+
+        // Add click handler to question cards
+        document.querySelectorAll('.question-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        // Syntax highlighting (simple version)
+        document.querySelectorAll('pre code').forEach(block => {
+            // This is a simplified version - in production you'd use Highlight.js
+            let text = block.textContent;
+            
+            // Keywords
+            text = text.replace(/\b(class|def|if|else|for|while|return|import|from|as|torch|np|pd|torch\.nn|torch\.optim)\b/g, 
+                               '<span class="keyword">$1</span>');
+            
+            // Strings
+            text = text.replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>');
+            text = text.replace(/"([^"]*)"/g, '<span class="string">"$1"</span>');
+            
+            // Comments
+            text = text.replace(/# (.*?)(\n|$)/g, '<span class="comment"># $1</span>$2');
+            
+            // Numbers
+            text = text.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+            
+            block.innerHTML = text;
+        });
+
+        // Print functionality
+        function printGuide() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

@@ -6,3 +6,5 @@ dataset/
 *.zip
 *.png
 *.jpg
+# Ignore the UrbanSound8K dataset directory
+UrbanSound8K/
