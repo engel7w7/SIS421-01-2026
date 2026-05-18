@@ -6,5 +6,9 @@ dataset/
 *.zip
 *.png
 *.jpg
-# Ignore the UrbanSound8K dataset directory
+
+# Ignore the dataset directory
 UrbanSound8K/
+LabelMe_Office_Dataset/
+Office_room.v1i.voc/
+Roboflow-Office-Dataset.voc/

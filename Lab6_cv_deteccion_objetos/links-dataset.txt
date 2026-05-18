@@ -1,0 +1,11 @@
+Dataset: Office room Object Detection
+
+-> Link dataset: https://universe.roboflow.com/office-room/office-room-iq0zz
+
+Dataset etiquetado manual - bounding box: LabelMe_Office_Dataset
+
+-> Link dataset: https://drive.google.com/drive/folders/1TCHK0zEzbYFMdlVqXpQicZbKzz3yrLA0?usp=sharing
+
+Dataset etiquetado manual - bounding box: RoboFlow-Office-Dataset.voc
+
+-> Link dataset: https://drive.google.com/drive/folders/1-MHyCu6hLUtDzxgAqjgOukIzKcQlkcmu?usp=sharing
